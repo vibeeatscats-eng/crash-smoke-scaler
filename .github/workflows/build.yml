@@ -1,0 +1,39 @@
+name: Build CrashSmokeScaler
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Download X-Plane SDK
+        run: |
+          curl -L -o sdk.zip https://developer.x-plane.com/wp-content/plugins/code-sample-generation/sdk_zip_files/XPSDK430.zip
+          Expand-Archive -Path sdk.zip -DestinationPath xpsdk
+        shell: pwsh
+
+      - name: Find SDK root (handles nested zip folder)
+        id: findsdk
+        run: |
+          $root = Get-ChildItem -Path xpsdk -Recurse -Directory -Filter "CHeaders" | Select-Object -First 1
+          $sdkPath = $root.Parent.FullName
+          echo "sdk_path=$sdkPath" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Configure
+        run: cmake -B build -DXPSDK_PATH="${{ steps.findsdk.outputs.sdk_path }}"
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Upload built plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrashSmokeScaler-win_x64
+          path: build/CrashSmokeScaler/win_x64/CrashSmokeScaler.xpl
