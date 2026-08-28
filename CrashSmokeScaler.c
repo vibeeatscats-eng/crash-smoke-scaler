@@ -20,12 +20,9 @@
  * exactly as laid out by the CMake install step (see README.txt).
  */
 
-#define XPLM400
-#define XPLM303
-#define XPLM301
-#define XPLM300
-#define XPLM210
-#define XPLM200
+/* XPLM400/303/301/300/210/200 are already defined via CMakeLists.txt's
+ * target_compile_definitions, so they are NOT redefined here (doing so in
+ * both places just produces C4005 macro-redefinition warnings). */
 
 #include <string.h>
 #include <stdio.h>
@@ -33,6 +30,7 @@
 #include "XPLMDataAccess.h"
 #include "XPLMDisplay.h"
 #include "XPLMGraphics.h"
+#include "XPLMMenus.h"
 #include "XPLMPlugin.h"
 #include "XPLMProcessing.h"
 #include "XPLMUtilities.h"
@@ -176,11 +174,14 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc)
     XPLMRegisterDataAccessor(
         "crashsmokescaler/smoke_scale",
         xplmType_Float,
-        1, /* writable */
-        NULL, NULL,
-        GetSmokeScale, SetSmokeScale,
-        NULL, NULL, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL);
+        1,                            /* writable */
+        NULL, NULL,                   /* int accessors        (unused) */
+        GetSmokeScale, SetSmokeScale, /* float accessors      (used)   */
+        NULL, NULL,                   /* double accessors     (unused) */
+        NULL, NULL,                   /* int-array accessors  (unused) */
+        NULL, NULL,                   /* float-array accessors(unused) */
+        NULL, NULL,                   /* data(byte) accessors (unused) */
+        NULL, NULL);                  /* read/write refcons   (unused) */
 
     CreateUI();
 
