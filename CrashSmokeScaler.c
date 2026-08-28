@@ -23,13 +23,13 @@
 #define SMOKE_SCALE_DEFAULT 1.0f
 #define SLIDER_STEPS 390
 
-static float      gSmokeScale = SMOKE_SCALE_DEFAULT;
+static float       gSmokeScale = SMOKE_SCALE_DEFAULT;
 static XPLMDataRef gSmokeScaleRef = NULL;
-static XPWidgetID gWindow = NULL;
-static XPWidgetID gSlider = NULL;
-static XPWidgetID gCaption = NULL;
-static XPWidgetID gValueLabel = NULL;
-static char       gValueText[32];
+static XPWidgetID  gWindow = NULL;
+static XPWidgetID  gSlider = NULL;
+static XPWidgetID  gCaption = NULL;
+static XPWidgetID  gValueLabel = NULL;
+static char        gValueText[32];
 
 static float GetSmokeScale(void *inRefcon)
 {
@@ -54,16 +54,20 @@ static int ScaleToSliderPos(float scale)
     float t = (scale - SMOKE_SCALE_MIN) /
               (SMOKE_SCALE_MAX - SMOKE_SCALE_MIN);
 
-    if (t < 0.0f) t = 0.0f;
-    if (t > 1.0f) t = 1.0f;
+    if (t < 0.0f)
+        t = 0.0f;
+    if (t > 1.0f)
+        t = 1.0f;
 
     return (int)(t * SLIDER_STEPS + 0.5f);
 }
 
 static float SliderPosToScale(int pos)
 {
-    if (pos < 0) pos = 0;
-    if (pos > SLIDER_STEPS) pos = SLIDER_STEPS;
+    if (pos < 0)
+        pos = 0;
+    if (pos > SLIDER_STEPS)
+        pos = SLIDER_STEPS;
 
     return SMOKE_SCALE_MIN +
            ((float)pos / (float)SLIDER_STEPS) *
@@ -117,9 +121,12 @@ static void CreateUI(void)
     int bottom = 500;
 
     gWindow = XPCreateWidget(
-        left, top, right, bottom, 0,
+        left, top, right, bottom,
+        0,
         "Crash Smoke Scaler",
-        1, NULL, xpWidgetClass_MainWindow);
+        1,
+        NULL,
+        xpWidgetClass_MainWindow);
 
     XPSetWidgetProperty(
         gWindow,
@@ -136,13 +143,18 @@ static void CreateUI(void)
         right - 10, top - 50,
         1,
         "Crash smoke particle size",
-        0, gWindow, xpWidgetClass_Caption);
+        0,
+        gWindow,
+        xpWidgetClass_Caption);
 
     gSlider = XPCreateWidget(
         left + 10, top - 60,
         right - 10, top - 80,
-        1, "",
-        0, gWindow, xpWidgetClass_ScrollBar);
+        1,
+        "",
+        0,
+        gWindow,
+        xpWidgetClass_ScrollBar);
 
     XPSetWidgetProperty(
         gSlider,
@@ -174,8 +186,11 @@ static void CreateUI(void)
     gValueLabel = XPCreateWidget(
         left + 10, top - 90,
         right - 10, top - 110,
-        1, gValueText,
-        0, gWindow, xpWidgetClass_Caption);
+        1,
+        gValueText,
+        0,
+        gWindow,
+        xpWidgetClass_Caption);
 
     XPAddWidgetCallback(gWindow, WindowWidgetHandler);
     XPHideWidget(gWindow);
@@ -200,20 +215,20 @@ PLUGIN_API int XPluginStart(char *outName,
            "Live slider to scale the crash smoke particle size.");
 
     /*
-     * XPLMRegisterDataAccessor takes two refcon arguments at the end:
-     * one for read accessors and one for write accessors.
+     * XPLMRegisterDataAccessor has 17 parameters:
+     * name, type, writable, six get/set pairs, and two refcons.
      */
     gSmokeScaleRef = XPLMRegisterDataAccessor(
         "crashsmokescaler/smoke_scale",
         xplmType_Float,
         1,
-        NULL, NULL,
-        GetSmokeScale, SetSmokeScale,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL,
-        NULL, NULL);
+        NULL, NULL,                  /* int get/set */
+        GetSmokeScale, SetSmokeScale,/* float get/set */
+        NULL, NULL,                  /* double get/set */
+        NULL, NULL,                  /* int array get/set */
+        NULL, NULL,                  /* float array get/set */
+        NULL, NULL,                  /* data get/set */
+        NULL, NULL);                 /* read/write refcons */
 
     if (!gSmokeScaleRef)
         return 0;
@@ -234,11 +249,13 @@ PLUGIN_API int XPluginStart(char *outName,
         NULL);
 
     if (menu)
+    {
         XPLMAppendMenuItem(
             menu,
             "Show slider",
             NULL,
             1);
+    }
 
     return 1;
 }
